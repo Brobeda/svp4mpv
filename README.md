@@ -42,10 +42,6 @@ VapourSynth must be available in your PATH, version R54 is confirmed to be
 working. Follow the download, extract, and adding to PATH sections
 [here](https://github.com/mpvnet-player/mpv.net/wiki/Using-VapourSynth-in-mpv.net).
 
-Add the following to your mpv.conf to prevent desyncs when seeking:
-
-    hr-seek-framedrop=no
-
 If using hardware-accelerated video playback, the `-copy` version of
 the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va`.
 
