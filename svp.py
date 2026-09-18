@@ -1,7 +1,8 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
+
 import vapoursynth as vs
 
 # Menu category > option name > possible choice > SVPFlow options
@@ -12,12 +13,22 @@ def deep_merge(source: dict[Any, Any], destination: dict[Any, Any]) -> None:
     for key, value in source.items():
         if isinstance(value, dict):
             node = destination.setdefault(key, {})
-            deep_merge(cast(dict[Any,Any], value), node)
+            deep_merge(cast("dict[Any, Any]", value), node)
         else:
             destination[key] = value
 
+
 def snake_case(name: str) -> str:
     return name.replace(" ", "_").lower()
+
+
+if TYPE_CHECKING:
+    video_in = vs.VideoClip()
+    video_in_dw = 1920
+    video_in_dh = 1080
+    container_fps = 24
+    display_res = (1920, 1080)
+    display_fps = 60
 
 basedir = Path(__file__).resolve().parent
 
@@ -28,15 +39,15 @@ else:
     menu_json = Path(os.environ["TMPDIR"] or "/tmp") / "svp_menu.json"
     config_json = Path(os.environ["TMPDIR"] or "/tmp") / "svp_config.json"
 
-win_w, win_h = cast(tuple[int, int], display_res)
-#win_w, win_h = user_data.split("/")
-#win_w, win_h = int(win_w), int(win_h)
+win_w, win_h = display_res
+# win_w, win_h = user_data.split("/")
+# win_w, win_h = int(win_w), int(win_h)
 
 options: dict[str, str] = json.loads(config_json.read_text())
-map: ConfigMap = json.loads((basedir / "map.json").read_text())
+cmap: ConfigMap = json.loads((basedir / "map.json").read_text())
 
 raw: dict[str, dict[str, Any]] = {}
-for section, opts in map.items():
+for _section, opts in cmap.items():  # noqa: PERF102
     for name, choices in opts.items():
         if (choice := options.get(snake_case(name))):
             deep_merge(choices[choice], raw)
@@ -44,14 +55,14 @@ for section, opts in map.items():
 if options["fill_with_light"] == "Disabled":
     raw["smoothfps"]["light"] = {"lights": 2, "length": 0, "aspect": 1.7778}
 
-src_fps = cast(float, container_fps)
+src_fps = cast("float", container_fps)
 if src_fps <= 0.1 or round(src_fps, 2) == 23.81:
     src_fps = 23.976
 
 fa = options["multiplicand"]
 fb = options["multiplier"]
 to_fps = src_fps
-screen_fps = cast(float, display_fps) or 60
+screen_fps = cast("float", display_fps) or 60
 
 if fa == "Video FPS":
     if str(fb).startswith("Auto"):
@@ -89,7 +100,7 @@ deep_merge({
 
 # [(categoryName, [(optionName, [value, ...]), ...]), ...]
 menu_options: list[tuple[str, list[tuple[str, list[str]]]]] = []
-for section, stuff in map.items():
+for section, stuff in cmap.items():
     if section == "Overrides":
         continue
     opts = [(opt, list(choices)) for opt, choices in stuff.items()]
@@ -105,33 +116,33 @@ thread_opt = options["processing_threads"]
 if thread_opt != "Do not change":
     core.num_threads += int(thread_opt)
 
-if not hasattr(core,'svp1'):
+if not hasattr(core, "svp1"):
     core.std.LoadPlugin(basedir / "third_party" / "svpflow1_vs.dll")
-if not hasattr(core,'svp2'):
+if not hasattr(core, "svp2"):
     core.std.LoadPlugin(basedir / "third_party" / "svpflow2_vs.dll")
 
 if options["duplicate_frames_removal"] == "Remove every other frame":
-    clip = video_in.std.SelectEvery(video_in,2,0).std.Trim(length=5000000)
+    clip = video_in.std.SelectEvery(video_in, 2, 0).std.Trim(length=5000000)
 else:
     clip = video_in.std.Trim(length=5000000)
 
 highbit = clip.format.bits_per_sample >= 10
 if highbit and video_in_dw * video_in_dh * src_fps <= 3840 * 2160 * 30:
-    input_um = clip.resize.Point(format=vs.YUV420P10,dither_type="random")
+    input_um = clip.resize.Point(format=vs.YUV420P10, dither_type="random")
     input_m = input_um
     input_m8 = input_m.resize.Point(format=vs.YUV420P8)
 else:  # no 10 bit decoding
-    input_um = clip.resize.Point(format=vs.YUV420P8,dither_type="random")
+    input_um = clip.resize.Point(format=vs.YUV420P8, dither_type="random")
     input_m = input_um
     input_m8 = input_m
 
 
-super = core.svp1.Super(input_m8, json.dumps(raw["super"]))
+sup = core.svp1.Super(input_m8, json.dumps(raw["super"]))
 vectors = core.svp1.Analyse(
-    super["clip"], super["data"], input_m8, json.dumps(raw["analyse"]),
+    sup["clip"], sup["data"], input_m8, json.dumps(raw["analyse"]),
 )
 smooth = core.svp2.SmoothFps(
-    input_m, super["clip"], super["data"], vectors["clip"], vectors["data"],
+    input_m, sup["clip"], sup["data"], vectors["clip"], vectors["data"],
     json.dumps(raw["smoothfps"]), src=input_um, fps=src_fps,
 )
 
