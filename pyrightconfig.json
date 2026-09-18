@@ -1,6 +1,0 @@
-{
-    "reportAny": false,
-    "reportExplicitAny": false,
-    "reportUnusedCallResult": false,
-    "pythonVersion": "3.10",
-}
