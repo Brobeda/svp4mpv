@@ -30,12 +30,12 @@ function Helpers:index_of(array, key)
     end
 end
 
-function Helpers:cycle(current, max, step)
+function Helpers:cycle(current, max, step, wrap)
     current = current + step
     if current < 1 then
-        return max
+        return wrap and max or 1
     elseif current > max then
-        return 1
+        return wrap and 1 or max
     else
         return current
     end
