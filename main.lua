@@ -96,6 +96,19 @@ end
 
 local function toggle()
     if stopped then start() else stop() end
+    if menu then
+        menu:close()
+        menu:open()
+    end
+end
+
+local function apply()
+    if stopped then
+        start()
+    else
+        update()
+        mp.osd_message("Applied")
+    end
 end
 
 local function save()
@@ -103,29 +116,35 @@ local function save()
     for key, value in pairs(config) do
         data = data .. key .. "=" .. value .. "\n"
     end
-    f = H:write_file(H:exp("~~home/script-opts/svp.conf"), data)
+    local path = H:exp("~~home/script-opts/svp.conf")
+    local f = H:write_file(path, data)
+    mp.osd_message("Saved options to " .. path)
 end
 
 local function show_menu()
     if menu == nil then
         menu = Menu:new({
+            stopped = stopped,
             choices = H:read_json(menu_json),
             config = config,
             defaults = defaults,
             keybindings = {
                 {
                     keys = {"ENTER", "KP_ENTER"},
-                    fn = function(self) toggle(); self:close() end
+                    fn = function(self) toggle() end
+                },
+                {
+                    keys = {"a"},
+                    fn = function(self) apply() end
                 },
                 {
                     keys = {"s", "ctrl+s"},
-                    fn = function(self) save(); self:close() end
+                    fn = function(self) save() end
                 },
             }
         })
         menu.on_config_changed = function()
             H:write_json(config_json, config)
-            schedule_update()
         end
     end
     menu:open()

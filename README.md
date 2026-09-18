@@ -48,16 +48,21 @@ the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va`.
 
 ## Usage
 
-Press Alt+Shift+S to open the menu, navigate with the arrow keys.
-While the menu is open, press Enter to toggle SVP on or off.
+- Press Alt+Shift+S to open the menu
+- Press Enter to toggle interpolation on or off
+- Navigate options with the arrow keys or HJKL, reset selected with R
+- Press A to apply changes immediately
+- Changes are forgotten when mpv is closed unless you press S, then a
+  file will be created in mpv's script-opts folder to remember your choices.
+- Press Escape or Q to close the menu.
 
 More details about the options can be found on the
 [SVP wiki](https://www.svp-team.com/wiki/Manual:FRC#Manual_Options_Selection).
 If you're in a hurry, try the settings from the above screenshot for maximum
 smoothness (the `*` indicates non-default settings).
 
-Changes are saved in mpv's script-opts folder when you press S while the menu
-is open. Manual editing is not advised.
+
+## Framerate Options
 
 The default multiplicand/multiplier settings pair try to be smart,
 for example: if you play a 24 FPS video on a 75hz screen, the script will

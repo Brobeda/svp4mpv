@@ -1,4 +1,5 @@
 --[[
+Modified from original script:
 Copyright: Ren Tatsumoto
 License: GNU GPL, version 3 or later; https://www.gnu.org/licenses/gpl-3.0.html
 ]]
@@ -27,6 +28,7 @@ local base_keybindings = {
     },
 }
 local Menu = {
+    stopped = true,
     choices = {},
     config = {},
     defaults = {},
@@ -84,9 +86,13 @@ function Menu:make_osd()
         end
     end
 
-    osd:newline():text("[s] Save settings")
-        :tab():text(" [r] Reset selected")
-        :tab():text(" [Enter] Toggle SVP")
+    osd:newline():
+        text(" [Enter] Turn " .. (self.stopped and "on" or "off") .. " SVP")
+        :tab():text("[←↓↑→] Navigate")
+        :tab():text("[R] Reset selected")
+        :tab():text("[A] Apply changes")
+        :tab():text("[S] Save changes")
+        :tab():text(" [Q] Quit")
 
     local s = function(v)
         if (v == "" or v == "0" or v == nil) then return "0" end
