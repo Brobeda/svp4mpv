@@ -176,7 +176,7 @@ def interpolate() -> None:
 
     clip = video_in
     if user_cfg["duplicate_frames_removal"] == "Remove every other frame":
-        clip = clip.std.SelectEvery(clip, 2, 0)
+        clip = clip.std.SelectEvery(cycle=2, offsets=0)
 
     input_um, input_m, input_m8 = get_inputs(clip.std.Trim(length=5_000_000))
 
