@@ -222,7 +222,7 @@
         },
         "GPU acceleration": {
             "Allow": {"super": {"gpu": 1}},
-            "Disable": {}
+            "Disable": {"super": {"gpu": 0}}
         },
         "GPU ID": {
             "Default (use first available)": {},
