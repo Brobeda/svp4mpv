@@ -1,6 +1,7 @@
 local H = require('helpers')
 local Menu = require('third_party.menu')
 
+local first_start = true
 local first_start_timer = nil
 local timer = nil
 local stopped = true
@@ -159,7 +160,7 @@ mp.observe_property("osd-width", "native", schedule_update)
 mp.observe_property("osd-height", "native", schedule_update)
 
 mp.add_key_binding("Alt+S", "svp-menu", function()
-    if H:file_exists(menu_json) then
+    if not first_start and H:file_exists(menu_json) then
         show_menu()
     else
         start()
@@ -167,6 +168,7 @@ mp.add_key_binding("Alt+S", "svp-menu", function()
             if H:file_exists(menu_json) then
                 first_start_timer:stop()
                 stop()
+                first_start = false
                 show_menu()
             end
         end)
