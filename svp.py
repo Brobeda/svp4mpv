@@ -5,8 +5,35 @@ from typing import TYPE_CHECKING, Any, cast
 
 import vapoursynth as vs
 
-# Menu category > option name > possible choice > SVPFlow options
-ConfigMap = dict[str, dict[str, dict[str, dict[str, Any]]]]
+core = vs.core
+
+# Variables defined by mpv at runtime
+if TYPE_CHECKING:
+    video_in = vs.VideoNode()
+    video_in_dw = 1920
+    video_in_dh = 1080
+    container_fps = 24.0
+    display_res = (1920, 1080)
+    display_fps = 60
+
+if container_fps <= 0.1 or round(container_fps, 2) == 23.81:
+    container_fps = 23.976
+
+win_w, win_h = display_res
+
+# Folders
+base_dir = Path(__file__).resolve().parent
+tmp_dir = Path(os.environ.get("TMPDIR") or "/tmp")
+if os.name == "nt":
+    tmp_dir = Path(os.environ["LOCALAPPDATA"]) / "Temp"
+
+# {option_name: value} written from parent main.lua, based on script_opts file
+user_cfg: dict[str, str] = \
+    json.loads((tmp_dir / "svp_config.json").read_text())
+
+# Menu Category > Option Name > Possible Choice > SVPFlow options dict
+cfg2svparams: dict[str, dict[str, dict[str, dict[str, Any]]]] = \
+    json.loads((base_dir / "map.json").read_text())
 
 
 def deep_merge(source: dict[Any, Any], destination: dict[Any, Any]) -> None:
@@ -18,148 +45,140 @@ def deep_merge(source: dict[Any, Any], destination: dict[Any, Any]) -> None:
             destination[key] = value
 
 
-def snake_case(name: str) -> str:
-    return name.replace(" ", "_").lower()
+def write_menu_entries() -> None:
+    # [(categoryName, [(optionName, [value, ...]), ...]), ...]
+    menu: list[tuple[str, list[tuple[str, list[str]]]]] = []
+    for section, stuff in cfg2svparams.items():
+        if section == "Overrides":
+            continue
+        opts = [(opt, list(choices)) for opt, choices in stuff.items()]
+        menu.append((section, opts))
+
+    (tmp_dir / "svp_menu.json").write_text(json.dumps(menu, indent=4), "utf-8")
 
 
-if TYPE_CHECKING:
-    video_in = vs.VideoClip()
-    video_in_dw = 1920
-    video_in_dh = 1080
-    container_fps = 24
-    display_res = (1920, 1080)
-    display_fps = 60
+def get_svparams_fps() -> dict[str, Any]:
+    base = user_cfg["multiplicand"]
+    times = user_cfg["multiplier"]
+    screen_fps = cast("float", display_fps) or 60
+    to_fps = container_fps
 
-basedir = Path(__file__).resolve().parent
+    if base == "Video FPS":
+        if str(times).startswith("Auto"):
+            factor = 1
+            while container_fps * factor < screen_fps - 9:
+                factor += 1
 
-if os.name == "nt":
-    menu_json = Path(os.environ["LOCALAPPDATA"]) / "Temp" / "svp_menu.json"
-    config_json = Path(os.environ["LOCALAPPDATA"]) / "Temp" / "svp_config.json"
-else:
-    menu_json = Path(os.environ["TMPDIR"] or "/tmp") / "svp_menu.json"
-    config_json = Path(os.environ["TMPDIR"] or "/tmp") / "svp_config.json"
-
-win_w, win_h = display_res
-# win_w, win_h = user_data.split("/")
-# win_w, win_h = int(win_w), int(win_h)
-
-user_cfg: dict[str, str] = json.loads(config_json.read_text())
-cfg2svparams: ConfigMap = json.loads((basedir / "map.json").read_text())
-
-svparams: dict[str, dict[str, Any]] = {}
-for _section, opts in cfg2svparams.items():  # noqa: PERF102
-    for name, choices in opts.items():
-        if (choice := user_cfg.get(snake_case(name))):
-            deep_merge(choices[choice], svparams)
-
-if user_cfg["fill_with_light"] == "Disabled":
-    svparams["smoothfps"]["light"] = {"lights": 2, "length": 0, "aspect": 1.7778}
-
-src_fps = cast("float", container_fps)
-if src_fps <= 0.1 or round(src_fps, 2) == 23.81:
-    src_fps = 23.976
-
-base = user_cfg["multiplicand"]
-times = user_cfg["multiplier"]
-to_fps = src_fps
-screen_fps = cast("float", display_fps) or 60
-
-if base == "Video FPS":
-    if str(times).startswith("Auto"):
-        factor = 1
-        while src_fps * factor < screen_fps - 9:
-            factor += 1
-
-        to_fps = src_fps * factor
-        if times == "Auto (respect vsync)":
-            to_fps = min(to_fps, screen_fps)
+            to_fps = container_fps * factor
+            if times == "Auto (respect vsync)":
+                to_fps = min(to_fps, screen_fps)
+        else:
+            to_fps = container_fps * float(times)
+    elif base == "Screen FPS":
+        if str(times).startswith("Auto"):
+            times = "1"
+        to_fps = screen_fps * float(times)
     else:
-        to_fps = src_fps * float(times)
-elif base == "Screen FPS":
-    if str(times).startswith("Auto"):
-        times = "1"
-    to_fps = screen_fps * float(times)
-else:
-    if str(times).startswith("Auto"):
-        times = "1"
-    to_fps = float(base.split(" FPS")[0]) * float(times)
+        if str(times).startswith("Auto"):
+            times = "1"
+        to_fps = float(base.split(" FPS")[0]) * float(times)
 
-svparams["smoothfps"].setdefault("rate", {}).update({
-    "num": to_fps * 10_000,
-    "den": 10_000,
-    "abs": True,
-})
-svparams["smoothfps"].setdefault("light", {})["aspect"] = win_w / (win_h or 1)
-# TODO: light settings, NVOF, RIFE, 8/10bit options
-
-deep_merge({
-    "super": json.loads(user_cfg["json_super"] or "{}"),
-    "analyse": json.loads(user_cfg["json_analyse"] or "{}"),
-    "smoothfps": json.loads(user_cfg["json_smoothfps"] or "{}"),
-}, svparams)
-
-# [(categoryName, [(optionName, [value, ...]), ...]), ...]
-menu_entries: list[tuple[str, list[tuple[str, list[str]]]]] = []
-for section, stuff in cfg2svparams.items():
-    if section == "Overrides":
-        continue
-    opts = [(opt, list(choices)) for opt, choices in stuff.items()]
-    menu_entries.append((section, opts))
-
-menu_json.write_text(json.dumps(menu_entries, indent=4))
-
-core = vs.core
-core.num_threads = ((os.cpu_count() or 2) * 2) - 1
-core.max_cache_size = 8192
-
-thread_opt = user_cfg["processing_threads"]
-if thread_opt != "Do not change":
-    core.num_threads += int(thread_opt)
-
-if not hasattr(core, "svp1"):
-    core.std.LoadPlugin(basedir / "third_party" / "svpflow1_vs.dll")
-if not hasattr(core, "svp2"):
-    core.std.LoadPlugin(basedir / "third_party" / "svpflow2_vs.dll")
-
-if user_cfg["duplicate_frames_removal"] == "Remove every other frame":
-    clip = video_in.std.SelectEvery(video_in, 2, 0).std.Trim(length=5000000)
-else:
-    clip = video_in.std.Trim(length=5000000)
-
-highbit = clip.format.bits_per_sample >= 10
-if highbit and video_in_dw * video_in_dh * src_fps <= 3840 * 2160 * 30:
-    input_um = clip.resize.Point(format=vs.YUV420P10, dither_type="random")
-    input_m = input_um
-    input_m8 = input_m.resize.Point(format=vs.YUV420P8)
-else:  # no 10 bit decoding
-    input_um = clip.resize.Point(format=vs.YUV420P8, dither_type="random")
-    input_m = input_um
-    input_m8 = input_m
+    return {
+        "num": to_fps * 10_000,
+        "den": 10_000,
+        "abs": True,
+    }
 
 
-sup = core.svp1.Super(input_m8, json.dumps(svparams["super"]))
-vectors = core.svp1.Analyse(
-    sup["clip"], sup["data"], input_m8, json.dumps(svparams["analyse"]),
-)
-smooth = core.svp2.SmoothFps(
-    input_m, sup["clip"], sup["data"], vectors["clip"], vectors["data"],
-    json.dumps(svparams["smoothfps"]), src=input_um, fps=src_fps,
-)
+def get_svparams() -> dict[str, dict[str, Any]]:
+    p = {}
 
-if user_cfg["fill_with_light"] == "Disabled":
-    delta_w = smooth.width - clip.width
-    delta_h = smooth.height - clip.height
-    if delta_w or delta_h:
-        left = delta_w // 2
-        right = delta_w - left
-        top = delta_h // 2
-        bottom = delta_h - top
-        smooth = core.std.Crop(
-            smooth, left=left, right=right, top=top, bottom=bottom,
-        )
+    def snake_case(name: str) -> str:
+        return name.replace(" ", "_").lower()
 
-assume = core.std.AssumeFPS(
-    smooth, fpsnum=smooth.fps_num, fpsden=smooth.fps_den,
-)
-assume.text.ClipInfo()
-assume.set_output()
+    for _section, opts in cfg2svparams.items():  # noqa: PERF102
+        for name, choices in opts.items():
+            if (choice := user_cfg.get(snake_case(name))):
+                deep_merge(choices[choice], p)
+
+    p["smoothfps"].setdefault("rate", {}).update(get_svparams_fps())
+
+    if user_cfg["fill_with_light"] == "Disabled":
+        p["smoothfps"]["light"] = {"lights": 2, "length": 0, "aspect": 1.7778}
+
+    p["smoothfps"].setdefault("light", {})["aspect"] = win_w / (win_h or 1)
+
+    deep_merge({
+        "super": json.loads(user_cfg["json_super"] or "{}"),
+        "analyse": json.loads(user_cfg["json_analyse"] or "{}"),
+        "smoothfps": json.loads(user_cfg["json_smoothfps"] or "{}"),
+    }, p)
+
+    return p
+
+
+def prepare_vapoursynth() -> None:
+    core.num_threads = ((os.cpu_count() or 2) * 2) - 1
+    core.max_cache_size = 8192
+
+    thread_opt = user_cfg["processing_threads"]
+    if thread_opt != "Do not change":
+        core.num_threads += int(thread_opt)
+
+    if not hasattr(core, "svp1"):
+        core.std.LoadPlugin(base_dir / "third_party" / "svpflow1_vs.dll")
+    if not hasattr(core, "svp2"):
+        core.std.LoadPlugin(base_dir / "third_party" / "svpflow2_vs.dll")
+
+
+def crop(clip: vs.VideoNode) -> vs.VideoNode:
+    if user_cfg["fill_with_light"] == "Disabled":
+        delta_w = clip.width - clip.width
+        delta_h = clip.height - clip.height
+        if delta_w or delta_h:
+            left = delta_w // 2
+            right = delta_w - left
+            top = delta_h // 2
+            bottom = delta_h - top
+            return core.std.Crop(
+                clip, left=left, right=right, top=top, bottom=bottom,
+            )
+    return clip
+
+
+def interpolate() -> None:
+    prepare_vapoursynth()
+
+    clip = video_in
+    if user_cfg["duplicate_frames_removal"] == "Remove every other frame":
+        clip = clip.std.SelectEvery(clip, 2, 0)
+    clip = clip.std.Trim(length=5_000_000)
+
+    hidepth = clip.format.bits_per_sample >= 10
+    if hidepth and video_in_dw * video_in_dh * container_fps <= 3840 * 2160 * 30:
+        input_um = clip.resize.Point(format=vs.YUV420P10, dither_type="random")
+        input_m = input_um
+        input_m8 = input_m.resize.Point(format=vs.YUV420P8)
+    else:  # no 10 bit decoding
+        input_um = clip.resize.Point(format=vs.YUV420P8, dither_type="random")
+        input_m = input_um
+        input_m8 = input_m
+
+    svparams = get_svparams()
+    sup = core.svp1.Super(input_m8, json.dumps(svparams["super"]))
+    vectors = core.svp1.Analyse(
+        sup["clip"], sup["data"], input_m8, json.dumps(svparams["analyse"]),
+    )
+    smooth = crop(core.svp2.SmoothFps(
+        input_m, sup["clip"], sup["data"], vectors["clip"], vectors["data"],
+        json.dumps(svparams["smoothfps"]), src=input_um, fps=container_fps,
+    ))
+    assume = core.std.AssumeFPS(
+        smooth, fpsnum=smooth.fps_num, fpsden=smooth.fps_den,
+    )
+    assume.text.ClipInfo()
+    assume.set_output()
+
+
+write_menu_entries()
+interpolate()
