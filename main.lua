@@ -72,20 +72,20 @@ local function new_file_print_state()
     mp.osd_message("SVP On")
 end
 
-local function stop()
+local function stop(silent)
     stopped = true
     mp.commandv("vf", "remove", "@svp")
-    mp.osd_message("SVP Off")
+    if not silent then mp.osd_message("SVP Off") end
 
     if original_hr_seek then
         mp.set_property("hr-seek-framedrop", original_hr_seek)
     end
 end
 
-local function start()
+local function start(silent)
     stopped = false
     update()
-    mp.osd_message("SVP On")
+    if not silent then mp.osd_message("SVP On") end
 end
 
 local function toggle()
@@ -153,17 +153,17 @@ mp.observe_property("osd-width", "native", schedule_update)
 mp.observe_property("osd-height", "native", schedule_update)
 
 mp.add_key_binding("Alt+S", "svp-menu", function()
-    if not first_start and H:file_exists(menu_json) then
-        show_menu()
-    else
-        start()
-        first_start_timer = mp.add_periodic_timer(0.1, function()
-            if H:file_exists(menu_json) then
-                first_start_timer:stop()
-                stop()
-                first_start = false
-                show_menu()
-            end
+    if first_start then
+        os.remove(menu_json)  -- remove any menu from old script version
+        start(true)  -- svp.py will run the logic to prepare the menu only
+        first_start_timer = mp.add_periodic_timer(0.02, function()
+            if not H:file_exists(menu_json) then return end
+            first_start_timer:stop()
+            stop(true)
+            first_start = false
+            show_menu()
         end)
+    else
+        show_menu()
     end
 end)

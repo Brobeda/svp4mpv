@@ -45,7 +45,11 @@ def deep_merge(source: dict[Any, Any], destination: dict[Any, Any]) -> None:
             destination[key] = value
 
 
-def write_menu_entries() -> None:
+def write_menu_entries() -> bool:
+    path = tmp_dir / "svp_menu.json"
+    if path.exists():
+        return False
+
     # [(categoryName, [(optionName, [value, ...]), ...]), ...]
     menu: list[tuple[str, list[tuple[str, list[str]]]]] = []
     for section, stuff in cfg2svparams.items():
@@ -55,6 +59,7 @@ def write_menu_entries() -> None:
         menu.append((section, opts))
 
     (tmp_dir / "svp_menu.json").write_text(json.dumps(menu, indent=4), "utf-8")
+    return True
 
 
 def get_svparams_fps() -> dict[str, Any]:
@@ -180,5 +185,5 @@ def interpolate() -> None:
     assume.set_output()
 
 
-write_menu_entries()
-interpolate()
+if not write_menu_entries():
+    interpolate()
