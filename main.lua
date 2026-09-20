@@ -49,16 +49,9 @@ require "mp.options".read_options(config)
 local function update()
     if stopped then return end
 
-    --local user_data =
-    --    ':user-data="' ..
-    --    mp.get_property("osd-width") .. "/" ..
-    --    mp.get_property("osd-height") ..
-    --    '"'
-    local user_data = ""  -- FIXME: not available before mpv 0.39
-
     local vpy = mp.command_native({"expand-path", "~~home/scripts/svp/svp.py"})
     local filter = '@svp:vapoursynth="' .. vpy ..
-        '":buffered-frames=4:concurrent-frames=23' .. user_data
+    '":buffered-frames=4:concurrent-frames=23'
     --mp.osd_message(filter)
 
     original_hr_seek = mp.get_property("hr-seek-framedrop", "yes")
