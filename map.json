@@ -154,10 +154,6 @@
                 "analyse": {"main": {"search": {"coarse": {"width": 530}}}}
             },
             "Large": {}
-        },
-        "Use NVIDIA Optical Flow": {
-            "Allow": {},
-            "Don't use": {}
         }
     },
     "Black bars": {
