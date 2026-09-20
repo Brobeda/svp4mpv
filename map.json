@@ -215,6 +215,11 @@
             "Do not remove": {},
             "Remove every other frame": {}
         },
+        "Native 10bit decoding": {
+            "Never allow": {},
+            "Allow under 4k30": {},
+            "Always allow": {}
+        },
         "GPU acceleration": {
             "Allow": {"super": {"gpu": 1}},
             "Disable": {}

@@ -36,6 +36,7 @@ local config = {
     border = "12",
     processing_of_scene_changes = "Repeat frame",
     duplicate_frames_removal = "Do not remove",
+    native_10bit_decoding = "Never allow",
     gpu_acceleration = "Allow",
     gpu_id = "Default (use first available)",
     processing_threads = "Do not change",

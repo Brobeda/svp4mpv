@@ -136,6 +136,26 @@ def prepare_vapoursynth() -> None:
         core.std.LoadPlugin(base_dir / "third_party" / "svpflow2_vs.dll")
 
 
+def get_inputs(clip: vs.VideoNode) -> tuple[vs.VideoNode, ...]:
+    hidepth = clip.format.bits_per_sample >= 10
+    allow = user_cfg["native_10bit_decoding"]
+    pixel_rate = video_in_dw * video_in_dh * container_fps
+
+    if hidepth and (
+        allow == "Always allow" or
+        (allow == "Allow under 4k30" and pixel_rate <= 3840 * 2160 * 30)
+    ):
+        um = clip.resize.Point(format=vs.YUV420P10, dither_type="random")
+        m = um
+        m8 = m.resize.Point(format=vs.YUV420P8)
+    else:
+        um = clip.resize.Point(format=vs.YUV420P8, dither_type="random")
+        m = um
+        m8 = m
+
+    return um, m, m8
+
+
 def crop(clip: vs.VideoNode) -> vs.VideoNode:
     if user_cfg["fill_with_light"] == "Disabled":
         delta_w = clip.width - clip.width
@@ -157,17 +177,8 @@ def interpolate() -> None:
     clip = video_in
     if user_cfg["duplicate_frames_removal"] == "Remove every other frame":
         clip = clip.std.SelectEvery(clip, 2, 0)
-    clip = clip.std.Trim(length=5_000_000)
 
-    hidepth = clip.format.bits_per_sample >= 10
-    if hidepth and video_in_dw * video_in_dh * container_fps <= 3840 * 2160 * 30:
-        input_um = clip.resize.Point(format=vs.YUV420P10, dither_type="random")
-        input_m = input_um
-        input_m8 = input_m.resize.Point(format=vs.YUV420P8)
-    else:  # no 10 bit decoding
-        input_um = clip.resize.Point(format=vs.YUV420P8, dither_type="random")
-        input_m = input_um
-        input_m8 = input_m
+    input_um, input_m, input_m8 = get_inputs(clip.std.Trim(length=5_000_000))
 
     svparams = get_svparams()
     sup = core.svp1.Super(input_m8, json.dumps(svparams["super"]))
