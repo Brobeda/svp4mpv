@@ -93,6 +93,7 @@ local function toggle()
     if stopped then start() else stop() end
     if menu then
         menu:close()
+        menu.stopped = stopped
         menu:open()
     end
 end
@@ -142,6 +143,7 @@ local function show_menu()
             H:write_json(config_json, config)
         end
     end
+    menu.stopped = stopped
     menu:open()
 end
 
