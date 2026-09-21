@@ -7,7 +7,7 @@ local first_start_timer = nil
 local timer = nil
 local stopped = true
 local menu = nil
-local original_hr_seek = ""
+local original_hr_seek = mp.get_property("hr-seek-framedrop", "yes")
 
 local menu_json = (os.getenv("TMPDIR") or "/tmp") .. "/svp_menu.json"
 local config_json = (os.getenv("TMPDIR") or "/tmp") .. "/svp_config.json"
@@ -61,10 +61,8 @@ local function update()
         '@svp:vapoursynth="' .. mp.get_script_directory() .. '/svp.py"' ..
         ':buffered-frames=4:concurrent-frames=23'
 
-    original_hr_seek = mp.get_property("hr-seek-framedrop", "yes")
-    mp.set_property("hr-seek-framedrop", "no")  -- Avoid desyncs on seek
-
     remove_filter()
+    mp.set_property("hr-seek-framedrop", "no")  -- Avoid desyncs on seek
     mp.commandv("vf", "add", filter)
     stopped = false
 end
