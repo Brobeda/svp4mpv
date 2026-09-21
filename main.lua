@@ -64,7 +64,6 @@ local function update()
     original_hr_seek = mp.get_property("hr-seek-framedrop", "yes")
     mp.set_property("hr-seek-framedrop", "no")  -- Avoid desyncs on seek
 
-    print(utils.format_json(mp.get_property("vf")))
     remove_filter()
     mp.commandv("vf", "add", filter)
     stopped = false
