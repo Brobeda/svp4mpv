@@ -40,6 +40,26 @@ local Menu = {
 }
 
 local update_timer = nil
+local last_drop_counts = {}
+local drop = 0
+local avg_drop = 0
+
+mp.add_periodic_timer(1, function()
+    drop = mp.get_property("frame-drop-count")
+    local sum = 0
+    local count = 0
+    for idx, v in ipairs(last_drop_counts) do
+        if idx ~= 1 then
+            sum = sum + v - last_drop_counts[idx - 1]
+            count = count + 1
+        end
+    end
+    print(utils.format_json(last_drop_counts), sum, count, drop, os.clock())
+    avg_drop = sum / count
+
+    table.insert(last_drop_counts, drop)
+    if #last_drop_counts > 5 then table.remove(last_drop_counts, 1) end
+end)
 
 function Menu:new(o)
     o = o or {}
@@ -118,9 +138,8 @@ function Menu:make_osd()
         :tab():gray("Current FPS: " .. s(mp.get_property("estimated-vf-fps")))
         :tab():gray("Dropped frames (decoder/output): " ..
             s(mp.get_property("decoder-frame-drop-count")) .. "/" ..
-            s(mp.get_property("frame-drop-count"))
+            s(drop) .. " (~" .. avg_drop .. "/s)"
         )
-
 
     return osd
 end
