@@ -156,19 +156,19 @@ def get_inputs(clip: vs.VideoNode) -> tuple[vs.VideoNode, ...]:
     return um, m, m8
 
 
-def crop(clip: vs.VideoNode) -> vs.VideoNode:
+def crop(clip: vs.VideoNode, smooth: vs.VideoNode) -> vs.VideoNode:
     if user_cfg["fill_with_light"] == "Disabled":
-        delta_w = clip.width - clip.width
-        delta_h = clip.height - clip.height
+        delta_w = smooth.width - clip.width
+        delta_h = smooth.height - clip.height
         if delta_w or delta_h:
             left = delta_w // 2
             right = delta_w - left
             top = delta_h // 2
             bottom = delta_h - top
             return core.std.Crop(
-                clip, left=left, right=right, top=top, bottom=bottom,
+                smooth, left=left, right=right, top=top, bottom=bottom,
             )
-    return clip
+    return smooth
 
 
 def interpolate(clip: vs.VideoNode) -> vs.VideoNode:
@@ -177,15 +177,15 @@ def interpolate(clip: vs.VideoNode) -> vs.VideoNode:
     clip = video_in
     if user_cfg["duplicate_frames_removal"] == "Remove every other frame":
         clip = clip.std.SelectEvery(cycle=2, offsets=0)
-
-    input_um, input_m, input_m8 = get_inputs(clip.std.Trim(length=5_000_000))
+    clip = clip.std.Trim(length=5_000_000)
+    input_um, input_m, input_m8 = get_inputs(clip)
 
     svparams = get_svparams()
     sup = core.svp1.Super(input_m8, json.dumps(svparams["super"]))
     vectors = core.svp1.Analyse(
         sup["clip"], sup["data"], input_m8, json.dumps(svparams["analyse"]),
     )
-    smooth = crop(core.svp2.SmoothFps(
+    smooth = crop(clip, core.svp2.SmoothFps(
         input_m, sup["clip"], sup["data"], vectors["clip"], vectors["data"],
         json.dumps(svparams["smoothfps"]), src=input_um, fps=container_fps,
     ))
