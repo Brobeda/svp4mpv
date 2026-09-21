@@ -55,7 +55,7 @@ mp.add_periodic_timer(1, function()
         end
     end
     print(utils.format_json(last_drop_counts), sum, count, drop, os.clock())
-    avg_drop = sum / count
+    avg_drop = math.max(0, sum / count)
 
     table.insert(last_drop_counts, drop)
     if #last_drop_counts > 5 then table.remove(last_drop_counts, 1) end
