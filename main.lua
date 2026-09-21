@@ -1,5 +1,6 @@
 local H = require('helpers')
 local Menu = require('third_party.menu')
+local utils = require('mp.utils')
 
 local first_start = true
 local first_start_timer = nil
@@ -47,6 +48,12 @@ local config = {
 local defaults = H:shallow_copy(config)
 require "mp.options".read_options(config)
 
+local function remove_filter()
+    if string.find(mp.get_property("vf"), "@svp") then
+        mp.commandv("vf", "remove", "@svp")
+    end
+end
+
 local function update()
     if stopped then return end
 
@@ -57,7 +64,8 @@ local function update()
     original_hr_seek = mp.get_property("hr-seek-framedrop", "yes")
     mp.set_property("hr-seek-framedrop", "no")  -- Avoid desyncs on seek
 
-    mp.commandv("vf", "remove", "@svp")
+    print(utils.format_json(mp.get_property("vf")))
+    remove_filter()
     mp.commandv("vf", "add", filter)
     stopped = false
 end
@@ -74,7 +82,7 @@ end
 
 local function stop(silent)
     stopped = true
-    mp.commandv("vf", "remove", "@svp")
+    remove_filter()
     if not silent then mp.osd_message("SVP Off") end
 
     if original_hr_seek then
