@@ -60,6 +60,8 @@ More details about the options can be found on the
 [SVP wiki](https://www.svp-team.com/wiki/Manual:FRC#Manual_Options_Selection).
 If you're in a hurry, try the settings from the above screenshot for maximum
 smoothness (the `*` indicates non-default settings).
+For options in the "Rendering" and "Motion vectors" sections, the choices
+are ordered from least (left) to most (right) CPU cost.
 
 
 ## Framerate Options
@@ -79,3 +81,25 @@ which will make a noticeable difference for SVP.
 
 If you have multiple monitors with different framerates, you may need to
 use mpv in full screen to avoid dropped frames.
+
+
+## Performance Issues
+
+The menu displays a dropped frames/second estimation
+(averaged over the last 4 seconds) on the bottom, which
+should stay at/near 0 for smooth playback.
+
+For weak hardware, the mpv rendering options can make a large difference.
+Hardware acceleration might actually degrade performance, e.g. with
+old Intel HD chips. Baseline settings to try:
+
+```
+vo=gpu-next
+libplacebo-opts=preset=fast
+hwdec=no
+```
+
+GPU acceleration and 10bit decoding in the SVP menu are important too.
+After that, the Motion Vectors section make the most difference.
+For animated content, using a larger motion vectors grid value (e.g. 24px)
+is essentially a free performance and quality increase.
