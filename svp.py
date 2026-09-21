@@ -171,7 +171,7 @@ def crop(clip: vs.VideoNode) -> vs.VideoNode:
     return clip
 
 
-def interpolate() -> None:
+def interpolate(clip: vs.VideoNode) -> vs.VideoNode:
     prepare_vapoursynth()
 
     clip = video_in
@@ -193,8 +193,10 @@ def interpolate() -> None:
         smooth, fpsnum=smooth.fps_num, fpsden=smooth.fps_den,
     )
     assume.text.ClipInfo()
-    assume.set_output()
+    return assume
 
 
-if not write_menu_entries():
-    interpolate()
+if write_menu_entries():
+    video_in.set_output()
+else:
+    interpolate(video_in).set_output()
