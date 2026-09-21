@@ -128,7 +128,7 @@ def prepare_vapoursynth() -> None:
 
     thread_opt = user_cfg["processing_threads"]
     if thread_opt != "Do not change":
-        core.num_threads += int(thread_opt)
+        core.num_threads = max(1, core.num_threads - int(thread_opt))
 
     if not hasattr(core, "svp1"):
         core.std.LoadPlugin(base_dir / "third_party" / "svpflow1_vs.dll")
