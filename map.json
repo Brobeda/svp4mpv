@@ -215,11 +215,6 @@
             "Do not remove": {},
             "Remove every other frame": {}
         },
-        "Native 10bit decoding": {
-            "Never allow": {},
-            "Allow under 4k30": {},
-            "Always allow": {}
-        },
         "GPU acceleration": {
             "Allow": {"super": {"gpu": 1}},
             "Disable": {"super": {"gpu": 0}}
@@ -235,6 +230,11 @@
             "1st GPU on 3rd OpenCL platform": {"smoothfps": {"gpuid": 31}},
             "2nd GPU on 3rd OpenCL platform": {"smoothfps": {"gpuid": 32}},
             "3rd GPU on 3rd OpenCL platform": {"smoothfps": {"gpuid": 33}}
+        },
+        "Native 10bit decoding": {
+            "Never allow": {},
+            "Allow under 4k30": {},
+            "Always allow": {}
         },
         "Processing threads": {
             "-6": {},

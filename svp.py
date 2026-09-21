@@ -141,7 +141,7 @@ def get_inputs(clip: vs.VideoNode) -> tuple[vs.VideoNode, ...]:
     allow = user_cfg["native_10bit_decoding"]
     pixel_rate = video_in_dw * video_in_dh * container_fps
 
-    if hidepth and (
+    if hidepth and user_cfg["gpu_acceleration"] != "Disable" and (
         allow == "Always allow" or
         (allow == "Allow under 4k30" and pixel_rate <= 3840 * 2160 * 30)
     ):

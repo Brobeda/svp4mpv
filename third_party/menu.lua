@@ -102,6 +102,12 @@ function Menu:make_osd()
                 end
             end
 
+            if self.config.gpu_acceleration == "Disable" then
+                if name == "Native 10bit decoding" then
+                    ineffective = true
+                end
+            end
+
             if self.selected == i then
                 osd:tab():selected(name):yellow(modified)
                 left()
