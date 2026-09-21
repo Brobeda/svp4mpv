@@ -38,7 +38,7 @@ is confirmed to be working, however v7.1.2.0, which uses a more recent version
 of mpv, crashes when loading any VapourSynth script. If this happens on your
 machine, try downgrading the player.
 
-VapourSynth must be available in your PATH, version R54 is confirmed to be
+VapourSynth must be available in your PATH, only version R54 is confirmed to be
 working. Follow the download, extract, and adding to PATH sections
 [here](https://github.com/mpvnet-player/mpv.net/wiki/Using-VapourSynth-in-mpv.net).
 
