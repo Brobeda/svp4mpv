@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import vapoursynth as vs
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     video_in_dh = 1080
     container_fps = 24.0
     display_res = (1920, 1080)
-    display_fps = 60
+    display_fps = 60.0
 
 if container_fps <= 0.1 or round(container_fps, 2) == 23.81:
     container_fps = 23.976
@@ -40,7 +40,7 @@ def deep_merge(source: dict[Any, Any], destination: dict[Any, Any]) -> None:
     for key, value in source.items():
         if isinstance(value, dict):
             node = destination.setdefault(key, {})
-            deep_merge(cast("dict[Any, Any]", value), node)
+            deep_merge(value, node)
         else:
             destination[key] = value
 
@@ -65,7 +65,7 @@ def write_menu_entries() -> bool:
 def get_svparams_fps() -> dict[str, Any]:
     base = user_cfg["multiplicand"]
     times = user_cfg["multiplier"]
-    screen_fps = cast("float", display_fps) or 60
+    screen_fps = display_fps or 60.0
     to_fps = container_fps
 
     if base == "Video FPS":
