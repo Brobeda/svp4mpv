@@ -50,10 +50,9 @@ require "mp.options".read_options(config)
 local function update()
     if stopped then return end
 
-    local vpy = mp.command_native({"expand-path", "~~home/scripts/svp/svp.py"})
-    local filter = '@svp:vapoursynth="' .. vpy ..
-    '":buffered-frames=4:concurrent-frames=23'
-    --mp.osd_message(filter)
+    local filter =
+        '@svp:vapoursynth="' .. mp.get_script_directory() .. '/svp.py"' ..
+        ':buffered-frames=4:concurrent-frames=23'
 
     original_hr_seek = mp.get_property("hr-seek-framedrop", "yes")
     mp.set_property("hr-seek-framedrop", "no")  -- Avoid desyncs on seek
