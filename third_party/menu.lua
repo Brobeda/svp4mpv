@@ -58,12 +58,22 @@ function Menu:make_osd()
 
         for _, option in ipairs(section[2]) do
             local name = option[1]
+            local choices = option[2]
             local value = self.config[H:snake_case(name)]
             local ineffective = false
             local modified = ""
 
             if value ~= self.defaults[H:snake_case(name)] then
                 modified = "*"
+            end
+
+            local left = function() osd:text('　🡠 ') end
+            local right = function() osd:text(' 🡢') end
+
+            if value == choices[1] then
+                left = function() osd:dark_gray('　🡠 ') end
+            elseif value == choices[#choices] then
+                right = function() osd:dark_gray(' 🡢') end
             end
 
             if self.config.frame_interpolation_mode ~= "Adaptive" then
@@ -73,15 +83,20 @@ function Menu:make_osd()
             end
 
             if self.selected == i then
-                osd:tab():selected(name):yellow(modified):gray('　🡠 ')
-                    :selected(value):gray(' 🡢'):newline()
+                osd:tab():selected(name):yellow(modified)
+                left()
+                osd:selected(value)
             elseif ineffective then
-                osd:tab():gray_item(name):yellow(modified)
-                    :gray('　🡠 '):gray(value):gray(' 🡢'):newline()
+                osd:tab():gray(name):yellow(modified)
+                left()
+                osd:gray(value)
             else
-                osd:tab():item(name):yellow(modified):gray('　🡠 '):text(value)
-                    :gray(' 🡢'):newline()
+                osd:tab():item(name):yellow(modified)
+                left()
+                osd:text(value)
             end
+            right()
+            osd:newline()
             i = i + 1
         end
     end
