@@ -18,7 +18,7 @@ The *LICENSE.txt* in this repository does not cover the files in the
 Not implemented:
 - Basic performance-quality slider (from looking at the original GUI's
   generated scripts, most levels changed absolutely nothing)
-- RIFE AI interpolation (too slow and too complicated for not much gained)
+- RIFE AI interpolation (too slow and complicated for little gained)
 - Automatic cropping of baked-in black bars
   (try [dynamic-crop.lua](https://github.com/Ashyni/mpv-scripts))
 - Phoning home
@@ -27,20 +27,29 @@ Not implemented:
 ## Installation
 
 Git clone or click **Code** → **Download ZIP** and then extract into your mpv
-scripts folder (usually `%APPDATA%\mpv\scripts` or `~/.config/mpv/scripts`).
+scripts folder (usually *%APPDATA%\mpv\scripts* or *~/.config/mpv/scripts*).
 
-Your mpv build must support VapourSynth.
-If you're using [mpv.net](https://github.com/mpvnet-player/mpv.net), this
-should be the case.
+Your mpv build must support VapourSynth. If you're using a
+[shinchiro build](https://sourceforge.net/projects/mpv-player-windows/files/release/)
+or [mpv.net](https://github.com/mpvnet-player/mpv.net), this should be the case.
+The correct version of VapourSynth for your mpv must also be available in PATH.
 
-As of 2026-06-12: mpv.net v7.1.1.0, which is based on mpv v0.37,
-is confirmed to be working, however v7.1.2.0, which uses a more recent version
-of mpv, crashes when loading any VapourSynth script. If this happens on your
-machine, try downgrading the player.
+As of September 2026, these combinations are confirmed to work:
 
-VapourSynth must be available in your PATH, only version R54 is confirmed to be
-working. Follow the download, extract, and adding to PATH sections
-[here](https://github.com/mpvnet-player/mpv.net/wiki/Using-VapourSynth-in-mpv.net).
+- **mpv 0.41** or **mpv.net v7.1.2.0** with **VapourSynth R72**
+- **mpv 0.37** or **mpv.net v7.1.1.0** with **VapourSynth R54**
+
+[StaxRip portable releases](https://github.com/staxrip/staxrip/releases)
+can be used to easily get VapourSynth and its dependencies:
+Download [v2.50.4](https://github.com/staxrip/staxrip/releases/download/v2.50.4/StaxRip-v2.50.4-x64.7z)
+to get **R72**, or [v2.13.0](https://github.com/staxrip/staxrip/releases/download/v2.13.0/StaxRip-v2.13.0-x64.7z)
+to get the older **R54**.
+
+Use Win+R `rundll32.exe sysdm.cpl,EditEnvironmentVariables` to access the
+editor quickly. If the extracted folder is e.g. *C:\StaxRip*, then
+add *C:\StaxRip\Apps\FrameServer\VapourSynth* to the top of your PATH user
+environment variable. In a new PowerShell session, `Get-Command VSPipe` should
+return a source path that matches what you added.
 
 If using hardware-accelerated video playback, the `-copy` version of
 the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va`.
@@ -93,7 +102,7 @@ For weak hardware, the mpv rendering options can make a large difference.
 Hardware acceleration might actually degrade performance, e.g. with
 old Intel HD chips. Baseline settings to try:
 
-```
+```ini
 vo=gpu-next
 libplacebo-opts=preset=fast
 hwdec=no
