@@ -45,7 +45,7 @@ function Helpers:snake_case(name)
     return name:gsub(" ", "_"):lower()
 end
 
-function Helpers:file_exists(path)
+function Helpers:path_exists(path)
     local f = io.open(path, "r")
     if f == nil then return false end
     io.close(f)
@@ -59,8 +59,26 @@ function Helpers:read_json(path)
     return assert(utils.parse_json(data))
 end
 
+function Helpers:mkdir(path)
+    if Helpers:path_exists(path) then return end
+
+    local args = {"mkdir", "-p", path}
+    if Helpers:on_windows() then
+        local path2, _count = path:gsub("/", "\\")
+        args = {"cmd", "/c", "mkdir", path2}
+    end
+
+    local result, error = mp.command_native({
+        name = "subprocess", playback_only = false, args = args,
+    })
+    if error then print("Error creating folder", path, "-", error) end
+end
+
 function Helpers:write_file(path, data)
-    local f = assert(io.open(Helpers:exp(path), "w"))
+    path = Helpers:exp(path)
+    local dir, _fname = utils.split_path(path)
+    Helpers:mkdir(dir)
+    local f = assert(io.open(path, "w"))
     f:write(data)
     f:close()
 end

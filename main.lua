@@ -164,7 +164,7 @@ mp.add_key_binding("Alt+S", "svp-menu", function()
         os.remove(menu_json)  -- remove any menu from old script version
         start(true)  -- svp.py will run the logic to prepare the menu only
         first_start_timer = mp.add_periodic_timer(0.02, function()
-            if not H:file_exists(menu_json) then return end
+            if not H:path_exists(menu_json) then return end
             first_start_timer:stop()
             stop(true)
             first_start = false
