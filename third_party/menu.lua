@@ -127,9 +127,10 @@ function Menu:make_osd()
         end
     end
 
-    osd:newline():
-        text(" [Enter] Turn " .. (self.stopped and "on" or "off") .. " SVP")
-        :tab():text("[←↓↑→] Navigate")
+    osd:newline()
+        :text("[←↓↑→] Navigate")
+        :tab()
+        :text(" [Enter] Turn " .. (self.stopped and "on" or "off") .. " SVP")
         :tab():text("[R] Reset selected")
         :tab():text("[A] Apply changes")
         :tab():text("[S] Save changes")
@@ -139,7 +140,7 @@ function Menu:make_osd()
         if (v == "" or v == "0" or v == nil) then return "0" end
         return v:gsub("%.?0+$", "")
     end
-    osd:newline():gray("Screen FPS: " .. s(mp.get_property("display-fps")))
+    osd:newline():gray("Screen Hz: " .. s(mp.get_property("display-fps")))
         :tab():gray("Original FPS: " .. s(mp.get_property("container-fps")))
         :tab():gray("Current FPS: " .. s(mp.get_property("estimated-vf-fps")))
         :tab():gray("Dropped frames (decoder/output): " ..
