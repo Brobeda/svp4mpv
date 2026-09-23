@@ -39,19 +39,19 @@ As of September 2026, these combinations are confirmed to work:
 - **mpv 0.41** or **mpv.net v7.1.2.0** with **VapourSynth R72**
 - **mpv 0.37** or **mpv.net v7.1.1.0** with **VapourSynth R54**
 
-[StaxRip portable releases](https://github.com/staxrip/staxrip/releases)
-can be used to easily get VapourSynth and its dependencies:
-Download [v2.50.4](https://github.com/staxrip/staxrip/releases/download/v2.50.4/StaxRip-v2.50.4-x64.7z)
-to get **R72**, or [v2.13.0](https://github.com/staxrip/staxrip/releases/download/v2.13.0/StaxRip-v2.13.0-x64.7z)
-to get the older **R54**.
+VapourSynth and its dependencies can be set up using the
+corresponding *Install-Portable-VapourSynth-Rxx.bat* from the
+[release page](https://github.com/vapoursynth/vapoursynth/release)
+(R72 direct link [here](https://github.com/vapoursynth/vapoursynth/releases/download/R72/Install-Portable-VapourSynth-R72.bat)).
+A *vapoursynth-portable* folder is created where you run the script.
+To add it to PATH quickly, paste the following in PowerShell
+(replace `C:\vapoursynth-portable` with the actual created folder's path):
 
-Use Win+R `rundll32.exe sysdm.cpl,EditEnvironmentVariables` to access the
-editor quickly. If the extracted folder is e.g. *C:\StaxRip*, then
-add *C:\StaxRip\Apps\FrameServer\VapourSynth* to the top of your PATH user
-environment variable. In a new PowerShell session, `Get-Command VSPipe` should
-return a source path that matches what you added.
+```powershell
+[Environment]::SetEnvironmentVariable("Path", "C:\vapoursynth-portable" + ";" + [Environment]::GetEnvironmentVariable("Path","User"),"User")
+```
 
-If using hardware-accelerated video playback, the `-copy` version of
+If using hardware-accelerated video playback in mpv, the `-copy` version of
 the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va`.
 
 
