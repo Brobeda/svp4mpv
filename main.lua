@@ -46,7 +46,7 @@ local config = {
     json_smoothfps = "",
 }
 local defaults = H:shallow_copy(config)
-require "mp.options".read_options(config)
+require "mp.options".read_options(config, "svp")
 
 local function remove_filter()
     if string.find(mp.get_property("vf"), "@svp") then
@@ -54,15 +54,78 @@ local function remove_filter()
     end
 end
 
+local ffi = require("ffi")
+
+-- Declare Windows API functions needed for DLL loading
+ffi.cdef[[
+    int SetDllDirectoryW(const wchar_t* lpPathName);
+    int SetEnvironmentVariableW(const wchar_t* lpName, const wchar_t* lpValue);
+]]
+
+-- Helper function to convert Lua UTF-8 strings to UTF-16 wide strings for Win32 API
+local function to_wchar(str)
+    local utf8 = require("ffi")
+    local len = #str + 1
+    local buf = ffi.new("wchar_t[?]", len)
+    for i = 1, #str do
+        buf[i - 1] = str:byte(i)
+    end
+    buf[#str] = 0
+    return buf
+end
+
+-- ====================================================
+-- Portable VapourSynth Path Resolution
+-- ====================================================
+local function get_vapoursynth_options()
+    if not H:on_windows() then return "" end
+
+    local script_dir = mp.get_script_directory()
+    local mpv_home = mp.command_native({"expand-path", "~~/"})
+
+    local candidates = {
+        utils.join_path(script_dir, "vapoursynth"),
+        utils.join_path(script_dir, "vapoursynth-portable"),
+        utils.join_path(mpv_home, "vapoursynth"),
+        mpv_home
+    }
+
+    for _, dir in ipairs(candidates) do
+        local dll_path = utils.join_path(dir, "vsscript.dll")
+        if H:path_exists(dll_path) then
+            local clean_dir = dir:gsub("/", "\\")
+            
+            -- 1. Register DLL directory directly with Windows OS loader
+            pcall(function()
+                ffi.C.SetDllDirectoryW(to_wchar(clean_dir))
+            end)
+
+            -- 2. Update process PATH variable via Windows API
+            local current_path = os.getenv("PATH") or ""
+            local new_path = clean_dir .. ";" .. current_path
+            pcall(function()
+                ffi.C.SetEnvironmentVariableW(to_wchar("PATH"), to_wchar(new_path))
+            end)
+
+            mp.msg.info("[svp4mpv] Successfully registered DLL directory with Windows API: " .. clean_dir)
+            break
+        end
+    end
+
+    return ""
+end
+
 local function update()
     if stopped then return end
+
+    get_vapoursynth_options() -- Resolves DLL path internally if present
 
     local filter =
         '@svp:vapoursynth="' .. mp.get_script_directory() .. '/svp.py"' ..
         ':buffered-frames=4:concurrent-frames=23'
 
     remove_filter()
-    mp.set_property("hr-seek-framedrop", "no")  -- Avoid desyncs on seek
+    mp.set_property("hr-seek-framedrop", "no")
     mp.commandv("vf", "add", filter)
     stopped = false
 end
