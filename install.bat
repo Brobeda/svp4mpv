@@ -56,6 +56,7 @@ echo Target Configuration Root: %BASE_CONFIG_DIR%
 echo.
 
 set "SCRIPT_FOLDER=%BASE_CONFIG_DIR%\scripts\svp4mpv"
+set "LEGACY_FOLDER=%BASE_CONFIG_DIR%\scripts\svp4mpv-master"
 set "PORTABLE_VS_FOLDER=%SCRIPT_FOLDER%\vapoursynth"
 set "TEMP_DIR=%TEMP%\svp4mpv_install"
 
@@ -80,6 +81,83 @@ if "%VS_CHOICE%"=="1" (
 echo.
 
 :: ==========================================
+:: LEGACY CHECK: existing scripts\svp4mpv-master
+:: (installs from the main branch used that folder name)
+:: ==========================================
+if not exist "%LEGACY_FOLDER%" goto legacy_done
+
+:legacy_prompt
+echo ====================================================
+echo  Existing installation found:
+echo  %LEGACY_FOLDER%
+echo ====================================================
+echo  This is the folder name used by the main branch.
+echo  This fork uses "svp4mpv" instead. Having both would make
+echo  mpv load the script twice, so please choose:
+echo.
+echo  1) Rename to "svp4mpv" and update in place (keeps your .conf files)
+echo  2) Delete the old folder (WARNING: removes all its files and settings)
+echo  3) Leave it alone (not recommended)
+set /p "LEGACY_CHOICE=Enter choice (1-3): "
+
+if "%LEGACY_CHOICE%"=="1" goto legacy_rename
+if "%LEGACY_CHOICE%"=="2" goto legacy_delete
+if "%LEGACY_CHOICE%"=="3" goto legacy_keep
+echo Invalid choice, try again.
+echo.
+goto legacy_prompt
+
+:legacy_rename
+if exist "%SCRIPT_FOLDER%" goto legacy_merge
+ren "%LEGACY_FOLDER%" "svp4mpv"
+if errorlevel 1 goto legacy_rename_failed
+echo Renamed svp4mpv-master to svp4mpv. Existing files will be kept.
+echo.
+goto legacy_done
+
+:legacy_merge
+:: Target "svp4mpv" already exists too: copy over only files that are
+:: missing there (so files already in svp4mpv, e.g. conf files, are kept),
+:: then remove the old folder.
+echo A "svp4mpv" folder already exists. Merging missing files from svp4mpv-master...
+robocopy "%LEGACY_FOLDER%" "%SCRIPT_FOLDER%" /E /XC /XN /XO /NFL /NDL /NJH /NJS /NP >nul
+if errorlevel 8 goto legacy_rename_failed
+rmdir /s /q "%LEGACY_FOLDER%"
+echo Merged and removed svp4mpv-master.
+echo.
+goto legacy_done
+
+:legacy_rename_failed
+echo ERROR: Could not rename or merge the folder. Is mpv currently running?
+echo Close it and re-run the installer.
+echo.
+pause
+exit /b 1
+
+:legacy_delete
+echo.
+echo WARNING: This will PERMANENTLY delete:
+echo   %LEGACY_FOLDER%
+echo All files inside, including your configuration files, will be lost.
+set /p "DEL_CONFIRM=Type YES to confirm deletion, anything else to go back: "
+if /i not "%DEL_CONFIRM%"=="YES" (
+    echo Deletion cancelled.
+    echo.
+    goto legacy_prompt
+)
+rmdir /s /q "%LEGACY_FOLDER%"
+if exist "%LEGACY_FOLDER%" goto legacy_rename_failed
+echo Deleted svp4mpv-master.
+echo.
+goto legacy_done
+
+:legacy_keep
+echo Leaving svp4mpv-master in place. Remember to remove or disable it later.
+echo.
+
+:legacy_done
+
+:: ==========================================
 :: EXECUTION PHASE: Deploying Scripts
 :: ==========================================
 echo ====================================================
@@ -92,7 +170,7 @@ if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
 echo [1/3] Downloading latest repository archive (master branch)...
 powershell.exe -ExecutionPolicy Bypass -Command ^
-    "Invoke-WebRequest -Uri 'https://github.com/Brobeda/svp4mpv/archive/refs/heads/master.zip' -OutFile '%TEMP_DIR%\repo.zip';" ^
+    "Invoke-WebRequest -Uri 'https://github.com/xrun1/svp4mpv/archive/refs/heads/master.zip' -OutFile '%TEMP_DIR%\repo.zip';" ^
     "Expand-Archive -Path '%TEMP_DIR%\repo.zip' -DestinationPath '%TEMP_DIR%\repo' -Force;" ^
     "Copy-Item -Path '%TEMP_DIR%\repo\svp4mpv-master\*' -Destination '%SCRIPT_FOLDER%' -Recurse -Force;"
 
