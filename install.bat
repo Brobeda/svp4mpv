@@ -92,7 +92,7 @@ if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
 echo [1/3] Downloading latest repository archive (master branch)...
 powershell.exe -ExecutionPolicy Bypass -Command ^
-    "Invoke-WebRequest -Uri 'https://github.com/xrun1/svp4mpv/archive/refs/heads/master.zip' -OutFile '%TEMP_DIR%\repo.zip';" ^
+    "Invoke-WebRequest -Uri 'https://github.com/Brobeda/svp4mpv/archive/refs/heads/master.zip' -OutFile '%TEMP_DIR%\repo.zip';" ^
     "Expand-Archive -Path '%TEMP_DIR%\repo.zip' -DestinationPath '%TEMP_DIR%\repo' -Force;" ^
     "Copy-Item -Path '%TEMP_DIR%\repo\svp4mpv-master\*' -Destination '%SCRIPT_FOLDER%' -Recurse -Force;"
 
