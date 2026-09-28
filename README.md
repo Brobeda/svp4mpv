@@ -32,7 +32,7 @@ Not implemented:
 interactive installer without saving it permanently:
 
 ```powershell
-irm https://raw.githubusercontent.com/xrun1/svp4mpv/master/install.bat -OutFile "$env:TEMP\svp4mpv-install.bat"; & "$env:TEMP\svp4mpv-install.bat"
+irm https://raw.githubusercontent.com/Brobeda/svp4mpv/master/install.bat -OutFile "$env:TEMP\svp4mpv-install.bat"; & "$env:TEMP\svp4mpv-install.bat"
 ```
 
 **Manual install:** **Git clone** this repository or click **Code** → **Download ZIP**. Extract the files into your mpv scripts folder:
