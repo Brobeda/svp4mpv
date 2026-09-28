@@ -98,7 +98,7 @@ the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va` i
 #### 6. Optional: UOSC button
   If you have [UOSC](https://github.com/tomasklaen/uosc) installed, you can add a button to your UOSC menu.
 
-1. Open `script-opts\uosc.conf` and loog for the line starts with `controls=`.
+1. Open `script-opts\uosc.conf` and look for the line starts with `controls=`.
 2. Add `command:slow_motion_video:script-binding svp4mpv/svp-menu?SVP,gap` at the desired position.\
 For example:\
 `controls=menu,gap,<video,audio>subtitles,<has_many_audio>audio,<has_many_video>video,<has_many_edition>editions,<stream>stream-quality,gap,command:slow_motion_video:script-binding svp4mpv/svp-menu?SVP,gap,space,<video,audio>speed,space,shuffle,loop-playlist,loop-file,gap,prev,items,next,gap,fullscreen`
