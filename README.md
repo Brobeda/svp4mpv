@@ -44,7 +44,7 @@ Not implemented:
 Run this in PowerShell to launch the interactive installer:
 
 ```powershell
-irm https://raw.githubusercontent.com/Brobeda/svp4mpv/master/install.bat -OutFile "$env:TEMP\svp4mpv-install.bat"; & "$env:TEMP\svp4mpv-install.bat"
+irm https://raw.githubusercontent.com/Brobeda/svp4mpv/master/install.ps1 | iex
 ```
 
 ### Method B: Manual Install
