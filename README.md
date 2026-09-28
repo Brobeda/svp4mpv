@@ -62,14 +62,25 @@ The correct version of VapourSynth for your mpv must be available in your system
 5. Run the `Install-Portable-VapourSynth-Rxx.bat` file to generate the portable environment.
 6. You will be asked to install R72 or the latest stable release. Choose **R72**.
 
-### 5. Add to PATH (Windows)
-To quickly add the portable folder to your user environment variables, open **PowerShell** and run the following command. 
+### 5. Make VapourSynth Available to mpv (Windows)
+Choose **one** of the following three methods:
 
-> ⚠️ **Important:** Replace `C:\vapoursynth-portable` with the actual path to your newly created folder.
+* **Option 1 (Recommended): Place inside the script folder**  
+  Move the entire `vapoursynth-portable` directory into your mpv script folder:
+  * `%APPDATA%\mpv\scripts\svp4mpv\`  
+  *(Optionally, you can rename `vapoursynth-portable` to `vapoursynth`)*
 
-```powershell
-[Environment]::SetEnvironmentVariable("Path", "C:\vapoursynth-portable" + ";" + [Environment]::GetEnvironmentVariable("Path","User"),"User")
-```
+* **Option 2: Place in the mpv root directory**  
+  Move all files and folders contained inside `vapoursynth-portable` directly into the mpv root directory where `mpv.exe` (or `mpvnet.exe`) is located.
+
+* **Option 3: Add to system PATH**  
+  > ⚠️ **Warning:** Using this method may cause version conflicts with other software on your system that relies on VapourSynth, as this setup requires an older/specific version.
+  
+  To add the portable folder to your user environment variables, open **PowerShell** and run the following command (replace `C:\vapoursynth-portable` with your actual folder path):
+
+  ```powershell
+  [Environment]::SetEnvironmentVariable("Path", "C:\vapoursynth-portable" + ";" + [Environment]::GetEnvironmentVariable("Path","User"),"User")
+
 
 If using hardware-accelerated video playback in mpv, the `-copy` version of
 the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va`.
