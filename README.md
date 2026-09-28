@@ -27,7 +27,15 @@ Not implemented:
 ## Installation
 
 ### 1. Download the Script
-**Git clone** this repository or click **Code** → **Download ZIP**. Extract the files into your mpv scripts folder:
+
+**Quick install (Windows):** run this in PowerShell to download and launch the
+interactive installer without saving it permanently:
+
+```powershell
+irm https://raw.githubusercontent.com/xrun1/svp4mpv/master/install.bat -OutFile "$env:TEMP\svp4mpv-install.bat"; & "$env:TEMP\svp4mpv-install.bat"
+```
+
+**Manual install:** **Git clone** this repository or click **Code** → **Download ZIP**. Extract the files into your mpv scripts folder:
 * **Windows:** `%APPDATA%\mpv\scripts`
 * **Linux/macOS:** `~/.config/mpv/scripts`
 
