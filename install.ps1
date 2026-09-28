@@ -16,7 +16,7 @@ try { $Host.UI.RawUI.WindowTitle = 'svp4mpv Universal Auto-Installer' } catch {}
 # ------------------------------------------------------------------
 # Constants
 # ------------------------------------------------------------------
-$RepoUrl      = 'https://github.com/xrun1/svp4mpv/archive/refs/heads/master.zip'
+$RepoUrl      = 'https://github.com/Brobeda/svp4mpv/archive/refs/heads/master.zip'
 $VsScriptUrl  = 'https://github.com/vapoursynth/vapoursynth/releases/download/R72/Install-Portable-VapourSynth-R72.ps1'
 $HwdecLine    = 'hwdec=d3d11va-copy'
 $SvpBinding   = 'Alt+Shift+s script-binding svp4mpv/svp-menu'
