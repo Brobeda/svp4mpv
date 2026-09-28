@@ -32,12 +32,10 @@ Not implemented:
    * [shinchiro build](https://github.com/shinchiro/mpv-winbuild-cmake/)
    * [mpv.net](https://github.com/mpvnet-player/mpv.net)
 
-2. **Version Compatibility:** Verify that your mpv version matches the required VapourSynth version:
-
-   | mpv / mpv.net Version | Required VapourSynth Version |
-   | :--- | :--- |
-   | **mpv 0.41** or **mpv.net v7.1.2.0** | **VapourSynth R72** |
-   | **mpv 0.37** or **mpv.net v7.1.1.0** | **VapourSynth R54** |
+2. **Version Compatibility:**
+  **VapourSynth R72** and **VapourSynth R54** are confirmed to work with:
+    - **mpv 0.41** or **mpv.net v7.1.2.0**
+    - **mpv 0.37** or **mpv.net v7.1.1.0**
 
 ---
 
