@@ -26,48 +26,52 @@ Not implemented:
 
 ## Installation
 
-### 1. Download the Script
+### Prerequisites
 
-**Quick install (Windows):** run this in PowerShell to download and launch the
-interactive installer without saving it permanently:
+1. **VapourSynth Support:** Your mpv build must support VapourSynth. This works out of the box with:
+   * A [shinchiro build](https://sourceforge.net/projects/mpv-player-windows/files/release/)
+   * [mpv.net](https://github.com/mpvnet-player/mpv.net)
+
+2. **Version Compatibility:** Verify that your mpv version matches the required VapourSynth version:
+
+   | mpv / mpv.net Version | Required VapourSynth Version |
+   | :--- | :--- |
+   | **mpv 0.41** or **mpv.net v7.1.2.0** | **VapourSynth R72** |
+   | **mpv 0.37** or **mpv.net v7.1.1.0** | **VapourSynth R54** |
+
+---
+
+### Method A: Quick Install (Windows)
+
+Run this in PowerShell to download and launch the interactive installer without saving it permanently:
 
 ```powershell
 irm https://raw.githubusercontent.com/Brobeda/svp4mpv/master/install.bat -OutFile "$env:TEMP\svp4mpv-install.bat"; & "$env:TEMP\svp4mpv-install.bat"
 ```
 
-**Manual install:** **Git clone** this repository or click **Code** → **Download ZIP**. Extract the files into your mpv scripts folder:
-* **Windows:** `%APPDATA%\mpv\scripts`
-* **Linux/macOS:** `~/.config/mpv/scripts`
+### Method B: Manual Install
 
-### 2. Check Prerequisites
-Your mpv build **must support VapourSynth**. This is supported out of the box if you use:
-* A [shinchiro build](https://sourceforge.net/projects/mpv-player-windows/files/release/)
-* [mpv.net](https://github.com/mpvnet-player/mpv.net)
+#### 1. Download the Script
+Clone this repository or click **Code** → **Download ZIP**. Extract the files into your mpv scripts directory:
+* **Windows:** `%APPDATA%\mpv\scripts\svp4mpv`
 
-### 3. Verify Version Compatibility
-The correct version of VapourSynth for your mpv must be available in your system's `PATH`. As of **September 2026**, the following combinations are confirmed to work:
 
-| mpv / mpv\.net Version | Required VapourSynth Version |
-| :--- | :--- |
-| **mpv 0.41** or **mpv\.net v7.1.2.0** | **VapourSynth R72** |
-| **mpv 0.37** or **mpv\.net v7.1.1.0** | **VapourSynth R54** |
-
-### 4. Set Up Portable VapourSynth
+#### 2. Set Up Portable VapourSynth
 1. Go to the [VapourSynth R72 release page](https://github.com/vapoursynth/vapoursynth/releases/tag/R72).
 2. Download these two files:
    * `Install-Portable-VapourSynth-Rxx.bat`
    * `Install-Portable-VapourSynth-R72.ps1`
 3. Create a new folder named `vapoursynth-portable`.
 4. Place both downloaded files into that folder.
-5. Run the `Install-Portable-VapourSynth-Rxx.bat` file to generate the portable environment.
-6. You will be asked to install R72 or the latest stable release. Choose **R72**.
+5. Run `Install-Portable-VapourSynth-Rxx.bat` to generate the portable environment.
+6. When prompted to install R72 or the latest stable release, choose **R72**.
 
-### 5. Make VapourSynth Available to mpv (Windows)
-Choose **one** of the following three methods:
+#### 3. Make VapourSynth Available to mpv (Windows)
+Choose **one** of the following three options:
 
 * **Option 1 (Recommended): Place inside the script folder**  
-  Move the entire `vapoursynth-portable` directory into your mpv script folder:
-  * `%APPDATA%\mpv\scripts\svp4mpv\`  
+  Move the entire `vapoursynth-portable` folder into your script directory:  
+  `%APPDATA%\mpv\scripts\svp4mpv\`  
   *(Optionally, you can rename `vapoursynth-portable` to `vapoursynth`)*
 
 * **Option 2: Place in the mpv root directory**  
@@ -75,11 +79,12 @@ Choose **one** of the following three methods:
 
 * **Option 3: Add to system PATH**  
   > ⚠️ **Warning:** Using this method may cause version conflicts with other software on your system that relies on VapourSynth, as this setup requires an older/specific version.
-  
-  To add the portable folder to your user environment variables, open **PowerShell** and run the following command (replace `C:\vapoursynth-portable` with your actual folder path):
+
+  To add the portable folder to your user environment variables, open **PowerShell** and run (replace `C:\vapoursynth-portable` with your actual path):
 
   ```powershell
   [Environment]::SetEnvironmentVariable("Path", "C:\vapoursynth-portable" + ";" + [Environment]::GetEnvironmentVariable("Path","User"),"User")
+  ```
 
 
 If using hardware-accelerated video playback in mpv, the `-copy` version of
