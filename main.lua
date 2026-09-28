@@ -222,7 +222,7 @@ mp.observe_property("display-fps", "native", schedule_update)
 mp.observe_property("osd-width", "native", schedule_update)
 mp.observe_property("osd-height", "native", schedule_update)
 
-mp.add_key_binding("Alt+S", "svp-menu", function()
+mp.add_key_binding(nil, "svp-menu", function()
     if first_start then
         os.remove(menu_json)  -- remove any menu from old script version
         start(true)  -- svp.py will run the logic to prepare the menu only
