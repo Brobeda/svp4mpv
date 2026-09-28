@@ -184,18 +184,60 @@ if "%RUN_VS_INSTALL%"=="YES" (
 )
 
 :: ==========================================
-:: CONFIGURATION PHASE: Editing mpv.conf
+:: CONFIGURATION PHASE: Editing mpv.conf and input.conf
 :: ==========================================
 echo [3/3] Checking hardware acceleration in mpv.conf...
 set "CONF_FILE=%BASE_CONFIG_DIR%\mpv.conf"
+set "INPUT_FILE=%BASE_CONFIG_DIR%\input.conf"
+
+:: Generate timestamp formatted as YYYYMMDD_HHMMSS
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set "YYYYMMDD=%%c%%a%%b")
+set "TIME_STAMP=%time::=%"
+set "TIME_STAMP=%TIME_STAMP: =0%"
+set "TIMESTAMP=%YYYYMMDD%_%TIME_STAMP:~0,6%"
 
 if not exist "%CONF_FILE%" (
     echo hwdec=d3d11va-copy > "%CONF_FILE%"
 ) else (
-    findstr /i "hwdec=" "%CONF_FILE%" >nul
-    if errorlevel 1 (
-        echo hwdec=d3d11va-copy >> "%CONF_FILE%"
-    )
+    rem Create a timestamped backup before modifying
+    copy "%CONF_FILE%" "%BASE_CONFIG_DIR%\mpv_bak_%TIMESTAMP%.conf" >nul
+    echo Created backup: mpv_bak_%TIMESTAMP%.conf
+
+    rem Use PowerShell to safely update or append hwdec line
+    powershell.exe -ExecutionPolicy Bypass -Command ^
+        "$path = '%CONF_FILE%';" ^
+        "$content = Get-Content -Path $path -Raw;" ^
+        "if ($null -eq $content) { $content = '' };" ^
+        "if ($content -match '(?m)^[ \t]*hwdec[ \t]*=[^\r\n]*$') {" ^
+        "    $content = $content -replace '(?m)^[ \t]*hwdec[ \t]*=[^\r\n]*$', 'hwdec=d3d11va-copy';" ^
+        "} else {" ^
+        "    $content = $content.TrimEnd() + [Environment]::NewLine + 'hwdec=d3d11va-copy' + [Environment]::NewLine;" ^
+        "}" ^
+        "[System.IO.File]::WriteAllText($path, $content);"
+)
+
+echo Checking svp4mpv menu keybinding in input.conf...
+
+if not exist "%INPUT_FILE%" (
+    echo Alt+Shift+s script-binding svp4mpv/svp-menu> "%INPUT_FILE%"
+) else (
+    rem Create a timestamped backup before modifying
+    copy "%INPUT_FILE%" "%BASE_CONFIG_DIR%\input_bak_%TIMESTAMP%.conf" >nul
+    echo Created backup: input_bak_%TIMESTAMP%.conf
+
+    rem Use PowerShell to safely update or append the Alt+Shift+s binding
+    powershell.exe -ExecutionPolicy Bypass -Command ^
+        "$path = '%INPUT_FILE%';" ^
+        "$bind = 'Alt+Shift+s script-binding svp4mpv/svp-menu';" ^
+        "$pattern = '(?mi)^[ \t]*Alt\+Shift\+s[ \t]+[^\r\n]*$';" ^
+        "$content = Get-Content -Path $path -Raw;" ^
+        "if ($null -eq $content) { $content = '' };" ^
+        "if ($content -match $pattern) {" ^
+        "    $content = $content -replace $pattern, $bind;" ^
+        "} else {" ^
+        "    $content = $content.TrimEnd() + [Environment]::NewLine + $bind + [Environment]::NewLine;" ^
+        "}" ^
+        "[System.IO.File]::WriteAllText($path, $content);"
 )
 
 :: Clean up temporary workspace directory
