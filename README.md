@@ -41,7 +41,7 @@ Not implemented:
 
 ### Method A: Quick Install (Windows)
 
-Run this in PowerShell to download and launch the interactive installer without saving it permanently:
+Run this in PowerShell to launch the interactive installer:
 
 ```powershell
 irm https://raw.githubusercontent.com/Brobeda/svp4mpv/master/install.bat -OutFile "$env:TEMP\svp4mpv-install.bat"; & "$env:TEMP\svp4mpv-install.bat"
