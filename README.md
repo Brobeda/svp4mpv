@@ -93,7 +93,7 @@ You can change the hotkey to whatever you like.
 #### 5. Edit `mpv.conf`
 
 If using hardware-accelerated video playback in mpv, the `-copy` version of
-the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va` in `mpv.conf`.
+the decoder must be used, e.g. `hwdec=d3d11va-copy` instead of `hwdec=d3d11va`.
 
 #### 6. Optional: UOSC button
   If you have [UOSC](https://github.com/tomasklaen/uosc) installed, you can add a button to your UOSC menu.
