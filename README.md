@@ -29,7 +29,7 @@ Not implemented:
 ### Prerequisites
 
 1. **VapourSynth Support:** Your mpv build must support VapourSynth. This works out of the box with:
-   * A [shinchiro build](https://sourceforge.net/projects/mpv-player-windows/files/release/)
+   * [shinchiro build](https://github.com/shinchiro/mpv-winbuild-cmake/)
    * [mpv.net](https://github.com/mpvnet-player/mpv.net)
 
 2. **Version Compatibility:** Verify that your mpv version matches the required VapourSynth version:
